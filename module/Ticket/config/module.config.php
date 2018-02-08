@@ -188,6 +188,17 @@ return [
                 'name' => 'code',
                 'continue_if_empty' => true,
             ],
+            4 => [
+                'required' => true,
+                'validators' => [
+                    0 => [
+                        'name' => \Zend\Validator\Uuid::class,
+                        'options' => [],
+                    ],
+                ],
+                'filters' => [],
+                'name' => 'user_profile_uuid',
+            ],
         ],
     ],
 ];

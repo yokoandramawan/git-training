@@ -23,7 +23,7 @@ class TicketHydratorFactory implements FactoryInterface
     {
         $entityManager = $container->get('doctrine.entitymanager.orm_default');
         $hydrator = new DoctrineObject($entityManager);
-        $hydrator->addStrategy('userProfile', new \Ticket\V1\Hydrator\Strategy\UserProfileStrategy);
+        $hydrator->addStrategy('userProfileUuid', new \Ticket\V1\Hydrator\Strategy\UserProfileStrategy);
         $hydrator->addStrategy('createdAt', new DateTimeFormatterStrategy('c'));
         $hydrator->addFilter('exclude', function ($property) {
             if (in_array($property, ['deletedAt', 'updatedAt'])) {

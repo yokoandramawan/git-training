@@ -6,17 +6,35 @@ use ZF\Rest\AbstractResourceListener;
 use Ticket\Mapper\Ticket as TicketMapper;
 use Ticket\Entity\Ticket as TicketEntity;
 use DoctrineModule\Stdlib\Hydrator\DoctrineObject;
+use User\Mapper\UserProfile as UserProfile;
 
 class TicketResource extends AbstractResourceListener
 {
     protected $ticketMapper;
     protected $ticketHydrator;
+    protected $userProfileMapper;
 
-    public function __construct(TicketMapper $ticketMapper, DoctrineObject $ticketHydrator)
+    public function __construct(
+        TicketMapper $ticketMapper, 
+        DoctrineObject $ticketHydrator,
+        UserProfile $userProfileMapper)
     {
         $this -> setTicketMapper($ticketMapper);
         $this -> setTicketHydrator($ticketHydrator);
+        $this -> setUserProfileMapper($userProfileMapper);
     }
+    
+    public function setUserProfileMapper(UserProfile $userProfileMapper)
+    {
+        $this -> userProfileMapper = $userProfileMapper;
+    }
+    
+    public function getUserProfileMapper()
+    {
+        return $this -> userProfileMapper;
+    }
+
+
     public function setTicketMapper($ticketMapper)
     {
         $this -> ticketMapper = $ticketMapper;
@@ -47,11 +65,17 @@ class TicketResource extends AbstractResourceListener
     public function create($data)
     {
         $inputFilter = $this ->getInputFilter()->getValues();
-        $inputFilter = (array) $inputFilter;
+        $userProfileUuid = $inputFilter['user_profile_uuid'];
+        $userProfileObj = $this->getUserProfileMapper()->getEntityRepository()->findOneBy(['uuid'=> $userProfileUuid]);        
+        if($userProfileObj == ''){
+            $event->setException('Cannot find uuid reference');
+            return;
+        }
+
         $ticketEntity = new TicketEntity;
-        // var_dump(get_class ($ticket));exit;
+        $inputFilter = (array) $inputFilter;
         $ticket = $this ->getTicketHydrator()->hydrate($inputFilter, $ticketEntity);
-        // var_dump(get_class($this ->getTicketMapper()->save));exit;
+        $ticket->setUserProfileUuid($userProfileObj);
         $result = $this ->getTicketMapper()->save($ticket);
         // return new ApiProblem(405, 'test okeThe POST method has not been defined');
     }

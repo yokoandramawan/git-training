@@ -11,8 +11,9 @@ class TicketResourceFactory implements FactoryInterface
     {
         $ticketMapper = $container->get('Ticket\Mapper\Ticket');
         $ticketHydrator = $container ->get('HydratorManager') ->get('Ticket\Hydrator\Ticket');
+        $userProfileMapper = $container ->get('User\Mapper\UserProfile');
         // var_dump($ticketHydrator);exit;
-        return new TicketResource($ticketMapper, $ticketHydrator);
+        return new TicketResource($ticketMapper, $ticketHydrator, $userProfileMapper);
         
     }
 }

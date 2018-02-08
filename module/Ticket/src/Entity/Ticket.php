@@ -4,6 +4,7 @@ namespace Ticket\Entity;
 
 use Aqilix\ORM\Entity\EntityInterface;
 use Gedmo\Timetampable\Traits\Timestampable as TimestampableTrait;
+use User\Entity\UserProfile;
 
 /**
  * Ticket
@@ -50,6 +51,10 @@ class Ticket implements EntityInterface
      */
     private $uuid;
 
+    /**
+     * @var string
+     */
+    private $userProfileUuid;
 
     /**
      * Set name
@@ -217,6 +222,24 @@ class Ticket implements EntityInterface
     public function getDeletedAt()
     {
         return $this->deletedAt;
+    }
+
+    
+    public function setUserProfileUuid($userProfileUuid)
+    {
+        $this->userProfileUuid = $userProfileUuid;
+
+        return $this;
+    }
+
+    /**
+     * Get deletedAt
+     *
+     * @return \DateTime
+     */
+    public function getUserProfileUuid()
+    {
+        return $this->userProfileUuid;
     }
 
     /**
