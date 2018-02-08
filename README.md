@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 API Development using ZF3, Apigility with OAuth2 support
 ============================================
 
@@ -110,3 +111,7 @@ If you have set this as `dev mode` you will see **Apigility Admin** on this url 
 API Testing
 -------------
 I use [Swagger](http://swagger.io/) for built in API Documentation. You can see it on `dev mode` by access this URL `http://localhost:8080/apigility/swagger`. You also can try the API Resources by using this Swagger
+=======
+# git-training
+Git Training
+>>>>>>> 3040c7c65124190dcc78a41ef2b03972d3b1d3e9
