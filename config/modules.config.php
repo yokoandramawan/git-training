@@ -35,5 +35,6 @@ return [
     'DoctrineModule',
     'DoctrineORMModule',
     'Aqilix',
-    'User'
+    'User',
+    'Ticket',
 ];
