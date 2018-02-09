@@ -186,13 +186,21 @@ class TicketResource extends AbstractResourceListener
     {
         $ticketEntity = $this->getTicketMapper()->fetchOneBy(['uuid' => $id]);
         if (is_null($ticketEntity)) {
-            return new ApiProblemResponse(new ApiProblem(404, "User Profile not found"));
+            return new ApiProblemResponse(new ApiProblem(404, "Ticket not found"));
         }
+        
+        
         $inputFilter = $this ->getInputFilter()->getValues();
+        $userProfileUuid = $inputFilter['user_profile_uuid'];
         $inputFilter = (array) $inputFilter;
-        // var_dump(get_class ($ticket));exit;
+        $userProfileObj = $this->getUserProfileMapper()->getEntityRepository()->findOneBy(['uuid' => $userProfileUuid]);
+        if ($userProfileObj == '') {
+            $event->setException('Cannot find uuid reference');
+            return;
+        }
         $ticket = $this ->getTicketHydrator()->hydrate($inputFilter, $ticketEntity);
         // var_dump(get_class($this ->getTicketMapper()->save));exit;
+        $ticket->setUserProfileUuid($userProfileObj);
         $result = $this ->getTicketMapper()->save($ticket);
         // return new ApiProblem(405, 'tesssThe PUT method has not been defined for individual resources');
     }
