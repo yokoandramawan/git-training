@@ -15,20 +15,21 @@ class TicketResource extends AbstractResourceListener
     protected $userProfileMapper;
 
     public function __construct(
-        TicketMapper $ticketMapper, 
+        TicketMapper $ticketMapper,
         DoctrineObject $ticketHydrator,
-        UserProfile $userProfileMapper)
-    {
+        UserProfile $userProfileMapper
+    ) {
+
         $this -> setTicketMapper($ticketMapper);
         $this -> setTicketHydrator($ticketHydrator);
         $this -> setUserProfileMapper($userProfileMapper);
     }
-    
+
     public function setUserProfileMapper(UserProfile $userProfileMapper)
     {
         $this -> userProfileMapper = $userProfileMapper;
     }
-    
+
     public function getUserProfileMapper()
     {
         return $this -> userProfileMapper;
@@ -66,8 +67,8 @@ class TicketResource extends AbstractResourceListener
     {
         $inputFilter = $this ->getInputFilter()->getValues();
         $userProfileUuid = $inputFilter['user_profile_uuid'];
-        $userProfileObj = $this->getUserProfileMapper()->getEntityRepository()->findOneBy(['uuid'=> $userProfileUuid]);        
-        if($userProfileObj == ''){
+        $userProfileObj = $this->getUserProfileMapper()->getEntityRepository()->findOneBy(['uuid' => $userProfileUuid]);
+        if ($userProfileObj == '') {
             $event->setException('Cannot find uuid reference');
             return;
         }

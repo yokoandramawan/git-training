@@ -224,7 +224,7 @@ class Ticket implements EntityInterface
         return $this->deletedAt;
     }
 
-    
+
     public function setUserProfileUuid($userProfileUuid)
     {
         $this->userProfileUuid = $userProfileUuid;
@@ -252,4 +252,3 @@ class Ticket implements EntityInterface
         return $this->uuid;
     }
 }
-
