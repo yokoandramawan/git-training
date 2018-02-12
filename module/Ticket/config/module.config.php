@@ -2,6 +2,7 @@
 return [
     'service_manager' => [
         'factories' => [
+            'ticket' => \Ticket\V1\Service\TicketFactory::class,
             \Ticket\V1\Rest\Ticket\TicketResource::class => \Ticket\V1\Rest\Ticket\TicketResourceFactory::class,
         ],
         'abstract_factories' => [
