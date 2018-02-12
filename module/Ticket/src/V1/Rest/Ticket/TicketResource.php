@@ -65,8 +65,9 @@ class TicketResource extends AbstractResourceListener
     public function create($data)
     {
         $inputFilter = $this ->getInputFilter()->getValues();
+        var_dump($inputFilter);exit;
         $userProfileUuid = $inputFilter['user_profile_uuid'];
-        $userProfileObj = $this->getUserProfileMapper()->getEntityRepository()->findOneBy(['uuid'=> $userProfileUuid]);        
+        $userProfileObj = $this->getUserProfileMapper()->getEntityRepository()->findOneBy(['uuid'=> $userProfileUuid]);
         if($userProfileObj == ''){
             $event->setException('Cannot find uuid reference');
             return;
