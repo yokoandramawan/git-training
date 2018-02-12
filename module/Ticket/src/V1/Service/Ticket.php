@@ -31,18 +31,18 @@ class Ticket
         $this -> setUserProfileMapper($userProfileMapper);
     }
 
-    public function getProfileEvent()
+    public function getTicketEvent()
     {
-        if ($this->profileEvent == null) {
-            $this->profileEvent = new ProfileEvent();
+        if ($this->ticketEvent == null) {
+            $this->ticketEvent = new TicketEvent();
         }
 
-        return $this->profileEvent;
+        return $this->ticketEvent;
     }
 
-    public function setProfileEvent(ProfileEvent $profileEvent)
+    public function setTicketEvent(TicketEvent $ticketEvent)
     {
-        $this->profileEvent = $profileEvent;
+        $this->ticketEvent = $ticketEvent;
     }
 
     public function setTicketMapper(TicketMapper $ticketMapper)
@@ -78,41 +78,73 @@ class Ticket
 
     public function save(array $data, ZendInputFilter $inputFilter)
     {
-        $inputFilter = $inputFilter->getValues();
-        $userProfileUuid = $inputFilter['user_profile_uuid'];
-        $userProfileObj = $this->getUserProfileMapper()->getEntityRepository()->findOneBy(['uuid'=> $userProfileUuid]);
-        if($userProfileObj == ''){
-            $event->setException('Cannot find uuid reference');
-            return;
+        $ticketEvent = new TicketEvent();
+        $ticketEvent->setInputFilter($inputFilter);
+        $ticketEvent->setName(TicketEvent::EVENT_CREATE_TICKET);
+        $create = $this->getEventManager()->triggerEvent($ticketEvent);
+        if ($create->stopped()) {
+            $ticketEvent->setName(TicketEvent::EVENT_CREATE_TICKET_ERROR);
+            $ticketEvent->setException($create->last());
+            $this->getEventManager()->triggerEvent($ticketEvent);
+            throw $ticketEvent->getException();
+        } else {
+            $ticketEvent->setName(TicketEvent::EVENT_CREATE_TICKET_SUCCESS);
+            $this->getEventManager()->triggerEvent($ticketEvent);
+            return $ticketEvent->getTicketEntity();
         }
-
-        $ticketEntity = new TicketEntity;
-        $inputFilter = (array) $inputFilter;
-        $ticket = $this ->getTicketHydrator()->hydrate($inputFilter, $ticketEntity);
-        $ticket->setUserProfileUuid($userProfileObj);
-        $result = $this ->getTicketMapper()->save($ticket);
     }
 
 
     public function update($ticketEntity, $inputFilter)
     {
-        $inputFilter = $inputFilter->getValues();
-        $userProfileUuid = $inputFilter['user_profile_uuid'];
-        $inputFilter = (array) $inputFilter;
-        $userProfileObj = $this->getUserProfileMapper()->getEntityRepository()->findOneBy(['uuid' => $userProfileUuid]);
-        if ($userProfileObj == '') {
-            $event->setException('Cannot find uuid reference');
-            return;
+        $ticketEvent = new TicketEvent();
+        $ticketEvent->setTicketEntity($ticketEntity);
+        $ticketEvent->setUpdateData($inputFilter->getValues());
+        $ticketEvent->setInputFilter($inputFilter);
+        $ticketEvent->setName(TicketEvent::EVENT_UPDATE_TICKET);
+        $update = $this->getEventManager()->triggerEvent($ticketEvent);
+        if ($update->stopped()) {
+            $ticketEvent->setName(TicketEvent::EVENT_UPDATE_TICKET_ERROR);
+            $ticketEvent->setException($update->last());
+            $this->getEventManager()->triggerEvent($ticketEvent);
+            throw $ticketEvent->getException();
+        } else {
+            $ticketEvent->setName(TicketEvent::EVENT_UPDATE_TICKET_SUCCESS);
+            $this->getEventManager()->triggerEvent($ticketEvent);
+            return $ticketEvent->getTicketEntity();
         }
-        $ticket = $this ->getTicketHydrator()->hydrate($inputFilter, $ticketEntity);
-        $ticket->setUserProfileUuid($userProfileObj);
-        $result = $this ->getTicketMapper()->save($ticket);
+        // $inputFilter = $inputFilter->getValues();
+        // $userProfileUuid = $inputFilter['user_profile_uuid'];
+        // $inputFilter = (array) $inputFilter;
+        // $userProfileObj = $this->getUserProfileMapper()->getEntityRepository()->findOneBy(['uuid' => $userProfileUuid]);
+        // if ($userProfileObj == '') {
+        //     $event->setException('Cannot find uuid reference');
+        //     return;
+        // }
+        // $ticket = $this ->getTicketHydrator()->hydrate($inputFilter, $ticketEntity);
+        // $ticket->setUserProfileUuid($userProfileObj);
+        // $result = $this ->getTicketMapper()->save($ticket);
     }
 
     public function delete($id)
     {
-        $ticketEntity = $this->getTicketMapper()->fetchOneBy(['uuid' => $id]);
-        $this ->getTicketMapper()->delete($ticketEntity);
-        return true;
+        $ticketEvent = new TicketEvent();
+        $ticketEvent->setDeletedUuid($id);
+        $ticketEvent->setName(TicketEvent::EVENT_DELETE_TICKET);
+        $create = $this->getEventManager()->triggerEvent($ticketEvent);
+        if ($create->stopped()) {
+            $ticketEvent->setName(TicketEvent::EVENT_DELETE_TICKET_ERROR);
+            $ticketEvent->setException($create->last());
+            $this->getEventManager()->triggerEvent($ticketEvent);
+            throw $ticketEvent->getException();
+        } else {
+            $ticketEvent->setName(TicketEvent::EVENT_DELETE_TICKET_SUCCESS);
+            $this->getEventManager()->triggerEvent($ticketEvent);
+            return true;
+        }
+
+        // $ticketEntity = $this->getTicketMapper()->fetchOneBy(['uuid' => $id]);
+        // $this ->getTicketMapper()->delete($ticketEntity);
+        // return true;
     }
 }

@@ -1,5 +1,5 @@
 <?php
-namespace User\V1\Service\Listener;
+namespace Ticket\V1\Service\Listener;
 
 use Zend\EventManager\ListenerAggregateInterface;
 use Zend\EventManager\EventManagerInterface;
@@ -7,21 +7,25 @@ use Zend\EventManager\ListenerAggregateTrait;
 use Zend\InputFilter\InputFilterInterface;
 use Zend\InputFilter\Exception\InvalidArgumentException;
 use Psr\Log\LoggerAwareTrait;
-use User\Mapper\UserProfile as UserProfileMapper;
+use Ticket\V1\TicketEvent;
+use ZF\ApiProblem\ApiProblem;
+use ZF\Rest\AbstractResourceListener;
+use Zend\InputFilter\InputFilter as ZendInputFilter;
+use Ticket\Mapper\Ticket as TicketMapper;
+use Ticket\Entity\Ticket as TicketEntity;
 use DoctrineModule\Stdlib\Hydrator\DoctrineObject;
-use User\V1\ProfileEvent;
+use User\Mapper\UserProfile as UserProfile;
 
-class ProfileEventListener implements ListenerAggregateInterface
+class TicketEventListener implements ListenerAggregateInterface
 {
     use ListenerAggregateTrait;
 
     use LoggerAwareTrait;
 
-    protected $config;
-
+    protected $ticketEvent;
+    protected $ticketMapper;
+    protected $ticketHydrator;
     protected $userProfileMapper;
-
-    protected $userProfileHydrator;
 
     /**
      * Constructor
@@ -31,13 +35,13 @@ class ProfileEventListener implements ListenerAggregateInterface
      * @param array $config
      */
     public function __construct(
-        UserProfileMapper $userProfileMapper,
-        DoctrineObject $userProfileHydrator,
-        array $config = []
+        TicketMapper $ticketMapper,
+        DoctrineObject $ticketHydrator,
+        UserProfile $userProfileMapper
     ) {
-        $this->setUserProfileMapper($userProfileMapper);
-        $this->setUserProfileHydrator($userProfileHydrator);
-        $this->setConfig($config);
+        $this -> setTicketMapper($ticketMapper);
+        $this -> setTicketHydrator($ticketHydrator);
+        $this -> setUserProfileMapper($userProfileMapper);
     }
 
     /**
@@ -47,8 +51,20 @@ class ProfileEventListener implements ListenerAggregateInterface
     public function attach(EventManagerInterface $events, $priority = 1)
     {
         $this->listeners[] = $events->attach(
-            ProfileEvent::EVENT_UPDATE_PROFILE,
-            [$this, 'updateProfile'],
+            TicketEvent::EVENT_CREATE_TICKET,
+            [$this, 'createTicket'],
+            500
+        );
+
+        $this->listeners[] = $events->attach(
+            TicketEvent::EVENT_UPDATE_TICKET,
+            [$this, 'updateTicket'],
+            499
+        );
+
+        $this->listeners[] = $events->attach(
+            TicketEvent::EVENT_DELETE_TICKET,
+            [$this, 'deleteTicket'],
             499
         );
     }
@@ -59,86 +75,103 @@ class ProfileEventListener implements ListenerAggregateInterface
      * @param  SignupEvent $event
      * @return void|\Exception
      */
-    public function updateProfile(ProfileEvent $event)
+    public function createTicket(TicketEvent $event)
     {
         try {
-            $userProfileEntity = $event->getUserProfileEntity();
-            $updateData  = $event->getUpdateData();
-            // add file input filter here
             if (! $event->getInputFilter() instanceof InputFilterInterface) {
                 throw new InvalidArgumentException('Input Filter not set');
             }
 
-            // adding filter for photo
-            $inputPhoto  = $event->getInputFilter()->get('photo');
-            $inputPhoto->getFilterChain()
-                    ->attach(new \Zend\Filter\File\RenameUpload([
-                        'target' => $this->getConfig()['backup_dir'],
-                        'randomize' => true,
-                        'use_upload_extension' => true
-                    ]));
-            $userProfile = $this->getUserProfileHydrator()->hydrate($updateData, $userProfileEntity);
-            $this->getUserProfileMapper()->save($userProfile);
-            $event->setUserProfileEntity($userProfile);
-            $this->logger->log(
-                \Psr\Log\LogLevel::INFO,
-                "{function} {username}",
-                [
-                    "function" => __FUNCTION__,
-                    "username" => $userProfileEntity->getUser()->getUsername()
-                ]
-            );
+            $data = $event->getInputFilter()->getValues();
+            $userProfileUuid    = $data['user_profile_uuid'];
+            $userProfileObj     = $this->getUserProfileMapper()->getEntityRepository()->findOneBy(['uuid' => $userProfileUuid]);
+            if ($userProfileObj == '') {
+                $event->setException('Cannot find uuid refrence');
+                return;
+            }
+
+            $ticketEntity = new TicketEntity;
+            $insertData = $event->getInputFilter()->getValues();
+            $ticket = $this->getTicketHydrator()->hydrate($data, $ticketEntity);
+            $ticket->setUserProfileUuid($userProfileObj);
+            $result = $this->getTicketMapper()->save($ticket);
+
         } catch (\Exception $e) {
             $event->stopPropagation(true);
             return $e;
         }
     }
 
-    /**
-     * @return the $config
-     */
-    public function getConfig()
+    public function updateTicket(TicketEvent $event)
     {
-        return $this->config;
+        try {
+            $ticketEntity = $event->getTicketEntity();
+            $updateData  = $event->getUpdateData();
+            $updateData = (array) $updateData;
+            // add file input filter here
+            if (! $event->getInputFilter() instanceof InputFilterInterface) {
+                throw new InvalidArgumentException('Input Filter not set');
+            }
+
+            $data = $event->getInputFilter()->getValues();
+            
+            $userProfileUuid    = $data['user_profile_uuid'];
+            $userProfileObj     = $this->getUserProfileMapper()->getEntityRepository()->findOneBy(['uuid' => $userProfileUuid]);
+            if ($userProfileObj == '') {
+                return new ApiProblem(500, 'Cannot find uuid refrence');
+            }
+
+            $ticket     = $this->getTicketHydrator()->hydrate($updateData, $ticketEntity);
+            $ticket->setUserProfileUuid($userProfileObj);
+            $result     = $this->getTicketMapper()->save($ticket);
+
+        } catch (\Exception $e) {
+            $event->stopPropagation(true);
+            return $e;
+        }
     }
 
-    /**
-     * @param array $config
-     */
-    public function setConfig(array $config)
+    public function deleteTicket(TicketEvent $event)
     {
-        $this->config = $config;
+        try {
+            $deletedUuid  = $event->getDeletedUuid();
+            $ticketObj  = $this->getTicketMapper()->getEntityRepository()->findOneBy(['uuid' => $deletedUuid]);
+            $this->getTicketMapper()->delete($ticketObj);
+            return true;
+
+        } catch (\Exception $e) {
+            $event->stopPropagation(true);
+            return $e;
+        }
     }
 
-    /**
-     * @return the $userProfileMapper
-     */
+    public function setTicketMapper(TicketMapper $ticketMapper)
+    {
+        $this -> ticketMapper = $ticketMapper;
+    }
+
+    public function getTicketMapper()
+    {
+        return $this -> ticketMapper;
+    }
+
+    public function setTicketHydrator(DoctrineObject $ticketHydrator)
+    {
+        $this -> ticketHydrator = $ticketHydrator;
+    }
+
+    public function getTicketHydrator()
+    {
+        return $this -> ticketHydrator;
+    }
+
+    public function setUserProfileMapper(UserProfile $userProfileMapper)
+    {
+        $this -> userProfileMapper = $userProfileMapper;
+    }
+
     public function getUserProfileMapper()
     {
-        return $this->userProfileMapper;
-    }
-
-    /**
-     * @param UserProfileMapper $userProfileMapper
-     */
-    public function setUserProfileMapper(UserProfileMapper $userProfileMapper)
-    {
-        $this->userProfileMapper = $userProfileMapper;
-    }
-
-    /**
-     * @return the $userProfileHydrator
-     */
-    public function getUserProfileHydrator()
-    {
-        return $this->userProfileHydrator;
-    }
-
-    /**
-     * @param DoctrineObject $userProfileHydrator
-     */
-    public function setUserProfileHydrator($userProfileHydrator)
-    {
-        $this->userProfileHydrator = $userProfileHydrator;
+        return $this -> userProfileMapper;
     }
 }

@@ -3,6 +3,7 @@ return [
     'service_manager' => [
         'factories' => [
             'ticket' => \Ticket\V1\Service\TicketFactory::class,
+            'ticket.listener' => \Ticket\V1\Service\Listener\TicketEventListenerFactory::class,
             \Ticket\V1\Rest\Ticket\TicketResource::class => \Ticket\V1\Rest\Ticket\TicketResourceFactory::class,
         ],
         'abstract_factories' => [
