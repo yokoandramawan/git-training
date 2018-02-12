@@ -15,20 +15,21 @@ class TicketResource extends AbstractResourceListener
     protected $userProfileMapper;
 
     public function __construct(
-        TicketMapper $ticketMapper, 
+        TicketMapper $ticketMapper,
         DoctrineObject $ticketHydrator,
-        UserProfile $userProfileMapper)
-    {
+        UserProfile $userProfileMapper
+    ) {
+
         $this -> setTicketMapper($ticketMapper);
         $this -> setTicketHydrator($ticketHydrator);
         $this -> setUserProfileMapper($userProfileMapper);
     }
-    
+
     public function setUserProfileMapper(UserProfile $userProfileMapper)
     {
         $this -> userProfileMapper = $userProfileMapper;
     }
-    
+
     public function getUserProfileMapper()
     {
         return $this -> userProfileMapper;
@@ -67,8 +68,13 @@ class TicketResource extends AbstractResourceListener
         $inputFilter = $this ->getInputFilter()->getValues();
         var_dump($inputFilter);exit;
         $userProfileUuid = $inputFilter['user_profile_uuid'];
+<<<<<<< HEAD
         $userProfileObj = $this->getUserProfileMapper()->getEntityRepository()->findOneBy(['uuid'=> $userProfileUuid]);
         if($userProfileObj == ''){
+=======
+        $userProfileObj = $this->getUserProfileMapper()->getEntityRepository()->findOneBy(['uuid' => $userProfileUuid]);
+        if ($userProfileObj == '') {
+>>>>>>> c1bd71ff44abf7a65af7d5505b2a3d247b8696ba
             $event->setException('Cannot find uuid reference');
             return;
         }
@@ -186,13 +192,21 @@ class TicketResource extends AbstractResourceListener
     {
         $ticketEntity = $this->getTicketMapper()->fetchOneBy(['uuid' => $id]);
         if (is_null($ticketEntity)) {
-            return new ApiProblemResponse(new ApiProblem(404, "User Profile not found"));
+            return new ApiProblemResponse(new ApiProblem(404, "Ticket not found"));
         }
+        
+        
         $inputFilter = $this ->getInputFilter()->getValues();
+        $userProfileUuid = $inputFilter['user_profile_uuid'];
         $inputFilter = (array) $inputFilter;
-        // var_dump(get_class ($ticket));exit;
+        $userProfileObj = $this->getUserProfileMapper()->getEntityRepository()->findOneBy(['uuid' => $userProfileUuid]);
+        if ($userProfileObj == '') {
+            $event->setException('Cannot find uuid reference');
+            return;
+        }
         $ticket = $this ->getTicketHydrator()->hydrate($inputFilter, $ticketEntity);
         // var_dump(get_class($this ->getTicketMapper()->save));exit;
+        $ticket->setUserProfileUuid($userProfileObj);
         $result = $this ->getTicketMapper()->save($ticket);
         // return new ApiProblem(405, 'tesssThe PUT method has not been defined for individual resources');
     }

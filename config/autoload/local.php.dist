@@ -3,7 +3,7 @@ return [
     'db' => [
         'adapters' => [
             'zf3_mysql' => [
-                'database' => 'zf3_apigility',
+                'database' => 'yoko_apigility',
                 'driver' => 'PDO_Mysql',
                 'hostname' => 'db',
                 'username' => 'zf3',

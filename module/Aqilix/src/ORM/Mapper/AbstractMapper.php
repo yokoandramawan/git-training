@@ -60,15 +60,15 @@ abstract class AbstractMapper implements MapperInterface
         $sort = ($asc === false) ? 'DESC' : 'ASC';
 
         // filter by status
-        if(isset($params['status'])){
+        if (isset($params['status'])) {
             $qb->where('t.status = :status')
-             ->setParameter('status',$params['status']);
+             ->setParameter('status', $params['status']);
         }
 
         $qb->orderBy('t.createdAt', $sort);
-        if(is_null($order)){
-            $qb->orderBy('t.createdAt',$sort);
-        }else{
+        if (is_null($order)) {
+            $qb->orderBy('t.createdAt', $sort);
+        } else {
             $qb->orderBy('t.createdAt', $sort);
         }
 
