@@ -95,10 +95,17 @@ class TicketEventListener implements ListenerAggregateInterface
             $ticket = $this->getTicketHydrator()->hydrate($data, $ticketEntity);
             $ticket->setUserProfileUuid($userProfileObj);
             $result = $this->getTicketMapper()->save($ticket);
+            $uuid   = $result->getUuid();
 
+            $this->logger->log(\Psr\Log\LogLevel::INFO, "{function} {uuid}: New data created successfully ", 
+                [
+                    'uuid' => $uuid,
+                    "function" => __FUNCTION__
+                ]);
+
+            
         } catch (\Exception $e) {
-            $event->stopPropagation(true);
-            return $e;
+            $this->logger->log(\Psr\Log\LogLevel::ERROR, "{function} : Something Error! \nError_message: ".$e->getMessage(), ["function" => __FUNCTION__]);
         }
     }
 
@@ -124,10 +131,10 @@ class TicketEventListener implements ListenerAggregateInterface
             $ticket     = $this->getTicketHydrator()->hydrate($updateData, $ticketEntity);
             $ticket->setUserProfileUuid($userProfileObj);
             $result     = $this->getTicketMapper()->save($ticket);
-
+            $uuid   = $result->getUuid();
+            $this->logger->log(\Psr\Log\LogLevel::INFO, "{function} : New data updated successfully! \nUUID: ".$uuid, ["function" => __FUNCTION__]);
         } catch (\Exception $e) {
-            $event->stopPropagation(true);
-            return $e;
+            $this->logger->log(\Psr\Log\LogLevel::ERROR, "{function} : Something Error! \nError_message: ".$e->getMessage(), ["function" => __FUNCTION__]);
         }
     }
 
@@ -137,11 +144,12 @@ class TicketEventListener implements ListenerAggregateInterface
             $deletedUuid  = $event->getDeletedUuid();
             $ticketObj  = $this->getTicketMapper()->getEntityRepository()->findOneBy(['uuid' => $deletedUuid]);
             $this->getTicketMapper()->delete($ticketObj);
+            $uuid   = $ticketObj->getUuid();
+            $this->logger->log(\Psr\Log\LogLevel::INFO, "{function} : Data deleted successfully! \nUUID: ".$uuid, ["function" => __FUNCTION__]);            
             return true;
 
         } catch (\Exception $e) {
-            $event->stopPropagation(true);
-            return $e;
+            $this->logger->log(\Psr\Log\LogLevel::ERROR, "{function} : Something Error! \nError_message: ".$e->getMessage(), ["function" => __FUNCTION__]);
         }
     }
 

@@ -11,6 +11,8 @@ class TicketEventListenerFactory implements FactoryInterface
         $ticketMapper = $container->get('Ticket\Mapper\Ticket');
         $ticketHydrator = $container ->get('HydratorManager') ->get('Ticket\Hydrator\Ticket');
         $userProfileMapper = $container ->get('User\Mapper\UserProfile');
-        return new TicketEventListener($ticketMapper, $ticketHydrator, $userProfileMapper);
+        $ticketEventListener = new TicketEventListener($ticketMapper, $ticketHydrator, $userProfileMapper);
+        $ticketEventListener->setLogger($container->get("logger_default"));
+        return $ticketEventListener;
     }
 }
