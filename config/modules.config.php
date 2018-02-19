@@ -37,4 +37,5 @@ return [
     'Aqilix',
     'User',
     'Ticket',
+    'Vehicle',
 ];

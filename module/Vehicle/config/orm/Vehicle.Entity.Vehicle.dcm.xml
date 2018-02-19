@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+  xmlns:gedmo="http://gediminasm.org/schemas/orm/doctrine-extensions-mapping">
+  <entity name="Vehicle\Entity\Vehicle" table="vehicle">
+    <indexes>
+      <index name="fk_vehicle_1_idx" columns="user_profile_uuid"/>
+    </indexes>
+    <id name="uuid" type="string" column="uuid" length="100">
+      <generator strategy="UUID"/>
+    </id>
+    <field name="plate" type="string" column="plate" length="50" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="note" type="text" column="note" length="65535" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="gpsId" type="string" column="gps_id" length="50" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="status" type="string" column="status" length="50" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="createdAt" type="datetime" column="created_at" nullable="true">
+    <gedmo:timestampable on="create"/>
+    </field>
+    <field name="updatedAt" type="datetime" column="updated_at" nullable="true">
+    <gedmo:timestampable on="update"/>
+    </field>
+    <field name="deletedAt" type="datetime" column="deleted_at" nullable="true"/>
+    <gedmo:soft-deleteable field-name="deletedAt" time-aware="false" />
+    <many-to-one field="userProfileUuid" target-entity="User\Entity\UserProfile" fetch="LAZY">
+      <join-columns>
+        <join-column name="user_profile_uuid" referenced-column-name="uuid"/>
+      </join-columns>
+    </many-to-one>
+  </entity>
+</doctrine-mapping>
