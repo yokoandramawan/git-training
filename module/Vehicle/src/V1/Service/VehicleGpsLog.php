@@ -6,7 +6,6 @@ use Zend\EventManager\EventManagerAwareTrait;
 use ZF\ApiProblem\ApiProblem;
 use ZF\Rest\AbstractResourceListener;
 use Zend\InputFilter\InputFilter as ZendInputFilter;
-use Vehicle\Mapper\VehicleGpsLog as VehicleGpsLogMapper;
 use Vehicle\Entity\VehicleGpsLog as VehicleGpsLogEntity;
 use DoctrineModule\Stdlib\Hydrator\DoctrineObject;
 use Vehicle\Mapper\Vehicle as VehicleIdMapper;
@@ -16,20 +15,7 @@ class VehicleGpsLog
     use EventManagerAwareTrait;
 
     protected $vehicleGpsLogEvent;
-    protected $vehicleGpsLogMapper;
-    protected $vehicleGpsLogHydrator;
-    protected $vehicleIdMapper;
-
-    public function __construct(
-        VehicleGpsLogMapper $vehicleGpsLogMapper,
-        DoctrineObject $vehicleGpsLogHydrator,
-        VehicleIdMapper $vehicleIdMapper
-    ) {
-
-        $this -> setVehicleGpsLogMapper($vehicleGpsLogMapper);
-        $this -> setVehicleGpsLogHydrator($vehicleGpsLogHydrator);
-        $this -> setVehicleIdMapper($vehicleIdMapper);
-    }
+    
 
     public function getVehicleGpsLogEvent()
     {
@@ -42,37 +28,7 @@ class VehicleGpsLog
 
     public function setVehicleGpsLogEvent(VehicleGpsLogEvent $vehicleGpsLogEvent)
     {
-        $this->vehicleGpsLogEvent = $vehicleGpsLogEvent;
-    }
-
-    public function setVehicleGpsLogMapper(VehicleGpsLogMapper $vehicleGpsLogMapper)
-    {
-        $this -> vehicleGpsLogMapper = $vehicleGpsLogMapper;
-    }
-
-    public function getVehicleGpsLogMapper()
-    {
-        return $this -> vehicleGpsLogMapper;
-    }
-
-    public function setVehicleGpsLogHydrator(DoctrineObject $vehicleGpsLogHydrator)
-    {
-        $this -> vehicleGpsLogHydrator = $vehicleGpsLogHydrator;
-    }
-
-    public function getVehicleGpsLogHydrator()
-    {
-        return $this -> vehicleGpsLogHydrator;
-    }
-
-    public function setVehicleIdMapper(VehicleIdMapper $vehicleIdMapper)
-    {
-        $this -> vehicleIdMapper = $vehicleIdMapper;
-    }
-
-    public function getVehicleIdMapper()
-    {
-        return $this -> vehicleIdMapper;
+        $this-> vehicleGpsLogEvent = $vehicleGpsLogEvent;
     }
 
 
