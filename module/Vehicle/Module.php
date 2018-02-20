@@ -13,6 +13,10 @@ class Module implements ApigilityProviderInterface
         $vehicleService = $serviceManager->get('vehicle');
         $vehicleEventListener = $serviceManager->get('vehicle.listener');
         $vehicleEventListener->attach($vehicleService->getEventManager());
+
+        $vehicleGpsLogService = $serviceManager->get('vehiclegpslog');
+        $vehicleGpsLogEventListener = $serviceManager->get('vehiclegpslog.listener');
+        $vehicleGpsLogEventListener->attach($vehicleGpsLogService->getEventManager());
     }
 
     public function getConfig()

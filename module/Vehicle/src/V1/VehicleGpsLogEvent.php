@@ -3,32 +3,32 @@
 namespace Vehicle\V1;
 
 use Zend\EventManager\Event;
-use Vehicle\Entity\Vehicle as VehicleEntity;
+use Vehicle\Entity\VehicleGpsLog as VehicleGpsLogEntity;
 use Zend\InputFilter\InputFilterInterface;
 use \Exception;
 
-class VehicleEvent extends Event
+class VehicleGpsLogEvent extends Event
 {
     /**#@+
      * Tracking events triggered by eventmanager
      */
-    const EVENT_CREATE_VEHICLE         = 'create.vehicle';
-    const EVENT_CREATE_VEHICLE_ERROR   = 'create.vehicle.error';
-    const EVENT_CREATE_VEHICLE_SUCCESS = 'create.vehicle.success';
+    const EVENT_CREATE_VEHICLEGPSLOG         = 'create.vehiclegpslog';
+    const EVENT_CREATE_VEHICLEGPSLOG_ERROR   = 'create.vehiclegpslog.error';
+    const EVENT_CREATE_VEHICLEGPSLOG_SUCCESS = 'create.vehiclegpslog.success';
 
-    const EVENT_UPDATE_VEHICLE         = 'update.vehicle';
-    const EVENT_UPDATE_VEHICLE_ERROR   = 'update.vehicle.error';
-    const EVENT_UPDATE_VEHICLE_SUCCESS = 'update.vehicle.success';
+    const EVENT_UPDATE_VEHICLEGPSLOG         = 'update.vehiclegpslog';
+    const EVENT_UPDATE_VEHICLEGPSLOG_ERROR   = 'update.vehiclegpslog.error';
+    const EVENT_UPDATE_VEHICLEGPSLOG_SUCCESS = 'update.vehiclegpslog.success';
 
-    const EVENT_DELETE_VEHICLE         = 'delete.vehicle';
-    const EVENT_DELETE_VEHICLE_ERROR   = 'delete.vehicle.error';
-    const EVENT_DELETE_VEHICLE_SUCCESS = 'delete.vehicle.success';
+    const EVENT_DELETE_VEHICLEGPSLOG         = 'delete.vehiclegpslog';
+    const EVENT_DELETE_VEHICLEGPSLOG_ERROR   = 'delete.vehiclegpslog.error';
+    const EVENT_DELETE_VEHICLEGPSLOG_SUCCESS = 'delete.vehiclegpslog.success';
     /**#@-*/
 
     /**
      * @var User\Entity\FakeGpsLog
      */
-    protected $vehicleEntity;
+    protected $vehicleGpsLogEntity;
 
     /**
      * @var Zend\InputFilter\InputFilterInterface
@@ -47,17 +47,17 @@ class VehicleEvent extends Event
     /**
      * @return the \User\Entity\FakeGpsLog
      */
-    public function getVehicleEntity()
+    public function getVehicleGpsLogEntity()
     {
-        return $this->vehicleEntity;
+        return $this->vehicleGpsLogEntity;
     }
 
     /**
      * @param User\Entity\FakeGpsLog $fakegps
      */
-    public function setVehicleEntity(VehicleEntity $vehicleEntity)
+    public function setVehicleGpsLogEntity(VehicleGpsLogEntity $vehicleGpsLogEntity)
     {
-        $this->vehicleEntity = $vehicleEntity;
+        $this->vehicleGpsLogEntity = $vehicleGpsLogEntity;
     }
 
     public function getUpdateData()
