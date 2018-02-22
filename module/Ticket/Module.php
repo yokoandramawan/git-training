@@ -3,8 +3,10 @@ namespace Ticket;
 
 use ZF\Apigility\Provider\ApigilityProviderInterface;
 use Zend\Mvc\MvcEvent;
+use Zend\ModuleManager\Feature\ConsoleUsageProviderInterface;
+use Zend\Console\Adapter\AdapterInterface as Console;
 
-class Module implements ApigilityProviderInterface
+class Module implements ApigilityProviderInterface, ConsoleUsageProviderInterface
 {
     public function onBootstrap(MvcEvent $mvcEvent)
     {
@@ -39,6 +41,18 @@ class Module implements ApigilityProviderInterface
                     __NAMESPACE__ => __DIR__ . '/src',
                 ],
             ],
+        ];
+    }
+
+    public function getConsoleUsage(Console $console)
+    {
+        return [
+            // Describe available commands
+            'FetchById [--verbose|-v] <uuid>' => 'Reset password for a user',
+
+            // Describe expected parameters
+            ['uuid' , 'UUID',        'Isi Uuid' ],
+            [ '--verbose|-v', '(optional) turn on verbose mode'        ],
         ];
     }
 }

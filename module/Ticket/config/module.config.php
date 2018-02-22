@@ -15,6 +15,26 @@ return [
             'Ticket\\Hydrator\\Ticket' => \Ticket\V1\Hydrator\TicketHydratorFactory::class,
         ],
     ],
+    'controllers' => [
+        'factories' => [
+            \Ticket\V1\Console\Controller\TicketController::class => \Ticket\V1\Console\Controller\TicketControllerFactory::class,
+        ],
+    ],
+    'console' => [
+        'router' => [
+            'routes' => [
+                'fetch-by-id' => [
+                    'options' => [
+                        'route'    => 'FetchById [--verbose|-v] <uuid>',
+                        'defaults' => [
+                            'controller' => \Ticket\V1\Console\Controller\TicketController::class,
+                            'action'     => 'fetchbyid',
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ],
     'router' => [
         'routes' => [
             'ticket.rest.ticket' => [
